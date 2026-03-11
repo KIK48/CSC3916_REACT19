@@ -26,8 +26,8 @@ const MovieDetail = () => {
       return <div>Error: {error}</div>;
     }
 
-    if (!selectedMovie) {
-      return <div>No movie data available.</div>;
+    if (!selectedMovie || !selectedMovie.actors || !selectedMovie.reviews) {
+      return <div>Loading movie details...</div>;
     }
 
     return (

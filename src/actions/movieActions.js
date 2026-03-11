@@ -1,5 +1,4 @@
 import actionTypes from '../constants/actionTypes';
-//import runtimeEnv from '@mars/heroku-js-runtime-env'
 const env = process.env;
 
 function moviesFetched(movies) {
@@ -31,42 +30,52 @@ export function setMovie(movie) {
 
 export function fetchMovie(movieId) {
     return dispatch => {
+        const token = localStorage.getItem('token');
         return fetch(`${env.REACT_APP_API_URL}/movies/${movieId}?reviews=true`, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
-                'Authorization': localStorage.getItem('token')
+                'Authorization': token
             },
             mode: 'cors'
         }).then((response) => {
-            if (!response.ok) {
-                throw Error(response.statusText);
-            }
-            return response.json()
+            if (!response.ok) throw Error(response.statusText);
+            return response.json();
         }).then((res) => {
-            dispatch(movieFetched(res));
+            // Pick the movie object out of the response
+            let selectedMovie = res.movie || (res.movies && res.movies[0]) || res;
+
+            // SAFETY: Force actors and reviews to be arrays. 
+            // This prevents the "Cannot read properties of undefined (reading 'map')" crash
+            if (selectedMovie) {
+                selectedMovie.actors = selectedMovie.actors || [];
+                selectedMovie.reviews = selectedMovie.reviews || [];
+            }
+
+            dispatch(movieFetched(selectedMovie));
         }).catch((e) => console.log(e));
     }
 }
 
 export function fetchMovies() {
     return dispatch => {
+        const token = localStorage.getItem('token');
         return fetch(`${env.REACT_APP_API_URL}/movies?reviews=true`, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
-                'Authorization': localStorage.getItem('token')
+                'Authorization': token
             },
             mode: 'cors'
         }).then((response) => {
-            if (!response.ok) {
-                throw Error(response.statusText);
-            }
-            return response.json()
+            if (!response.ok) throw Error(response.statusText);
+            return response.json();
         }).then((res) => {
-            dispatch(moviesFetched(res));
+            // Send only the array to the reducer so the movie list can .map() correctly
+            const movieList = Array.isArray(res.movies) ? res.movies : [];
+            dispatch(moviesFetched(movieList));
         }).catch((e) => console.log(e));
     }
 }
