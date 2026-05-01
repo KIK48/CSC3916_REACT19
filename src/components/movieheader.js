@@ -7,7 +7,6 @@ import { logoutUser } from "../actions/authActions";
 function MovieHeader() {
     const dispatch = useDispatch();
     const loggedIn = useSelector((state) => state.auth.loggedIn);
-    const username = useSelector((state) => state.auth.username);
     const selectedMovie = useSelector((state) => state.movie.selectedMovie);
     
     const logout = () => {
@@ -21,13 +20,16 @@ function MovieHeader() {
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
                 <Navbar.Collapse id="basic-navbar-nav">
                 <Nav className="ml-auto">
-                    <Nav.Link as={NavLink} to="/movielist" disabled={!loggedIn}> 
+                    <Nav.Link as={NavLink} to="/movielist" disabled={!loggedIn}>
                         Movie List
                     </Nav.Link>
                     <Nav.Link as={NavLink} to={'/movie/' + (selectedMovie? selectedMovie._id: '')} disabled={!loggedIn}>
                         Movie Detail
                     </Nav.Link>
-                    <Nav.Link as={NavLink} to="/signin"> 
+                    <Nav.Link as={NavLink} to="/search" disabled={!loggedIn}>
+                        Search
+                    </Nav.Link>
+                    <Nav.Link as={NavLink} to="/signin">
                         {loggedIn? (
                         <span onClick={logout} style={{ cursor: 'pointer' }}>
                             Logout

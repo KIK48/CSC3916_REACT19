@@ -58,6 +58,47 @@ export function fetchMovie(movieId) {
     }
 }
 
+export function submitReview(movieId, rating, review) {
+    return dispatch => {
+        const token = localStorage.getItem('token');
+        return fetch(`${env.REACT_APP_API_URL}/reviews`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': token
+            },
+            body: JSON.stringify({ movieId, rating, review }),
+            mode: 'cors'
+        }).then((response) => {
+            if (!response.ok) throw Error(response.statusText);
+            return response.json();
+        }).then(() => {
+            dispatch(fetchMovie(movieId));
+        }).catch((e) => console.log(e));
+    }
+}
+
+export function searchMovies(query) {
+    return fetch(`${env.REACT_APP_API_URL}/search`, {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': localStorage.getItem('token')
+        },
+        body: JSON.stringify({ title: query, actorName: query }),
+        mode: 'cors'
+    }).then((response) => {
+        if (!response.ok) {
+            return response.text().then(text => {
+                throw new Error(`HTTP ${response.status}: ${text || response.statusText}`);
+            });
+        }
+        return response.json();
+    });
+}
+
 export function fetchMovies() {
     return dispatch => {
         const token = localStorage.getItem('token');
@@ -73,8 +114,7 @@ export function fetchMovies() {
             if (!response.ok) throw Error(response.statusText);
             return response.json();
         }).then((res) => {
-            // Send only the array to the reducer so the movie list can .map() correctly
-            const movieList = Array.isArray(res.movies) ? res.movies : [];
+            const movieList = Array.isArray(res) ? res : (Array.isArray(res.movies) ? res.movies : []);
             dispatch(moviesFetched(movieList));
         }).catch((e) => console.log(e));
     }
